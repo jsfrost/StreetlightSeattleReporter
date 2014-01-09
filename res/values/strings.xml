@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Streetlight Seattle Reporter</string>
+    <string name="action_settings">Settings</string>
+    <string name="empty_string"></string>
+    <string name="name_message">Name:</string>
+    <string name="phone_message">Phone:</string>
+    <string name="extension_message">extension</string>
+    <string name="email_message">Email address:</string>
+    <string name="scan_barcode_button">Scan Barcode</string>
+    <string name="pole_number_message">7-digit number on pole</string>
+    <string name="address_message">Location / Address of pole:</string>
+    <string name="problem_type_message">Problem type:</string>
+    <string name="comments_message">Comments</string>
+    <string name="submit_button">Submit Trouble Report</string>
+    <string name="clear_button">Clear Form</string>
+    <string name="problem_type_out">Out</string>
+    <string name="problem_type_off_on">Off/On</string>
+    <string name="problem_type_on_during_daylight">On During Daylight</string>
+    <string name="problem_type_glare_problem">Glare Problem</string>
+    <string name="problem_type_damaged">Damaged</string>
+    <string name="problem_type_pole_down">Pole Down</string>
+    <string name="problem_type_unknown">Unknown</string>
+    <string name="response_1">Streetlight Trouble Reporting Form</string>
+    <string name="response_2">Thank you for reporting this problem. With an estimated 84,000 streetlights in our system, we rely on our customers to notify us of malfunctioning streetlights.</string>
+    <string name="response_3">Seattle City Light has a goal to respond to a reported streetlight outage within 10 business days. That means the light will be fixed or, if the repair is more complicated, City Light will contact you with an explanation of the work that needs to be done and how long it could take. </string>
+    <string name="response_3a">If your light has not been repaired, please send us an email at <b>street.light@seattle.gov</b>. We appreciate your patience as we work to make repairs as soon as possible.</string>
+    <string name="response_4">To follow-up with any additional questions regarding your streetlight, please call 206.684.7056.</string>
+
+</resources>

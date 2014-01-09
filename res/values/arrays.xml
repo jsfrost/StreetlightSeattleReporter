@@ -1,0 +1,12 @@
+<resources>
+    <string-array 
+        name="problem_type">
+        <item>@string/problem_type_out</item>
+        <item>@string/problem_type_off_on</item>
+        <item>@string/problem_type_on_during_daylight</item>
+        <item>@string/problem_type_glare_problem</item>
+        <item>@string/problem_type_damaged</item>
+        <item>@string/problem_type_pole_down</item>
+        <item>@string/problem_type_unknown</item>
+    </string-array>
+</resources>
