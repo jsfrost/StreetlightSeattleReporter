@@ -4,6 +4,7 @@
     <string name="app_name">Streetlight Seattle Reporter</string>
     <string name="action_settings">Settings</string>
     <string name="empty_string"></string>
+    <string name="instructional_message">You may use this form to inform Seattle City Light of a problem with one of their streetlights.\n</string>
     <string name="name_message">Name:</string>
     <string name="phone_message">Phone:</string>
     <string name="extension_message">extension</string>
@@ -12,7 +13,7 @@
     <string name="pole_number_message">7-digit number on pole</string>
     <string name="address_message">Location / Address of pole:</string>
     <string name="problem_type_message">Problem type:</string>
-    <string name="comments_message">Comments</string>
+    <string name="comments_message">Comments:</string>
     <string name="submit_button">Submit Trouble Report</string>
     <string name="clear_button">Clear Form</string>
     <string name="problem_type_out">Out</string>

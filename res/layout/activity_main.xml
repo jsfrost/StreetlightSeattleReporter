@@ -13,6 +13,10 @@
 	    android:paddingTop="@dimen/activity_vertical_margin"
 	    tools:context=".MainActivity" 
 	    android:orientation="vertical" >
+	    
+	    <TextView android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:text="@string/instructional_message" />
 	
 	    <EditText android:id="@+id/name_field"
 	        android:inputType="textCapWords"
@@ -24,6 +28,7 @@
 	        android:inputType="phone"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
+	        android:ems="8"
 	        android:hint="@string/phone_message" />
 	        
 	    <EditText android:id="@+id/extension_field"
@@ -52,7 +57,7 @@
 	    
 	    <EditText android:id="@+id/pole_number_field"
 	        android:inputType="number"
-	        android:layout_width="match_parent"
+	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:hint="@string/pole_number_message" />
 	    
