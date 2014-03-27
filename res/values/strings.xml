@@ -23,6 +23,7 @@
     <string name="problem_type_damaged">Damaged</string>
     <string name="problem_type_pole_down">Pole Down</string>
     <string name="problem_type_unknown">Unknown</string>
+    <string name="app_initials">ssr</string>
     <string name="response_1">Streetlight Trouble Reporting Form</string>
     <string name="response_2">Thank you for reporting this problem. With an estimated 84,000 streetlights in our system, we rely on our customers to notify us of malfunctioning streetlights.</string>
     <string name="response_3">Seattle City Light has a goal to respond to a reported streetlight outage within 10 business days. That means the light will be fixed or, if the repair is more complicated, City Light will contact you with an explanation of the work that needs to be done and how long it could take. </string>

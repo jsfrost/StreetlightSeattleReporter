@@ -4,6 +4,7 @@
  */
 package org.codeforseattle.streetlightseattlereporter;
 
+import java.util.HashMap;
 import java.util.List;
 
 import android.os.Build;
@@ -11,16 +12,18 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.annotation.TargetApi;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,7 +33,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity 
+{
+	ResponseReceiver mResponseReceiver = new ResponseReceiver();
+	protected final static String SUBMIT_RESPONSE_STR = "org.codeforseattle.streetlightseattlereporter.SUBMIT_RESPONSE";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +44,20 @@ public class MainActivity extends FragmentActivity {
 		setContentView(R.layout.activity_main);
 		
 		initializeGui();
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		registerReceiver(mResponseReceiver, new IntentFilter(SUBMIT_RESPONSE_STR));
+	}
+	
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		unregisterReceiver(mResponseReceiver);
 	}
 
 	@Override
@@ -49,9 +69,9 @@ public class MainActivity extends FragmentActivity {
 	
 	private void initializeGui()
 	{
+		EditText nameField = (EditText) findViewById(R.id.name_field);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 		{
-			EditText nameField = (EditText) findViewById(R.id.name_field);
 			String userName = getUserName();
 			if (userName != null)
 				nameField.setText(userName);
@@ -67,6 +87,8 @@ public class MainActivity extends FragmentActivity {
 		Button scanBtn = (Button) findViewById(R.id.scan_barcode_button);
 		if (! cameraPresent) // Do not try bar code scanning without the camera.
 			scanBtn.setEnabled(false);
+		
+		setFocus();
 	}
 	
 	/**
@@ -197,15 +219,10 @@ public class MainActivity extends FragmentActivity {
 		clearField(R.id.address_field, resources.getString(R.string.address_message));
 		((Spinner) findViewById(R.id.spinner_problem_type)).setSelection(0);
 		clearField(R.id.problem_description_field, resources.getString(R.string.comments_message));
-		((EditText) findViewById(R.id.email_field)).requestFocus();
-		
-		if (clearEmailAddress) {
+		if (clearEmailAddress)
 			clearField(R.id.email_field, resources.getString(R.string.email_message));
-			((EditText) findViewById(R.id.email_field)).requestFocus();
-		}
-		else {
-			((EditText) findViewById(R.id.pole_number_field)).requestFocus();
-		}
+		
+		setFocus();
 	}
 	
 	private void clearField(int id, String hint)
@@ -213,6 +230,22 @@ public class MainActivity extends FragmentActivity {
 	    EditText field = (EditText)findViewById(id);
 	    field.setText("");
 	    field.setHint(hint);
+	}
+	
+	private void setFocus()
+	{
+		EditText nameField  = (EditText) findViewById(R.id.name_field);
+		EditText phoneField = (EditText) findViewById(R.id.phone_field);
+		EditText emailField = (EditText) findViewById(R.id.email_field);
+		
+		if (nameField.getText().toString().trim().equals(""))
+			nameField.requestFocus();
+		else if (phoneField.getText().toString().trim().equals(""))
+			phoneField.requestFocus();
+		else if (emailField.getText().toString().trim().equals(""))
+			emailField.requestFocus();
+		else
+			((EditText) findViewById(R.id.pole_number_field)).requestFocus();
 	}
 	
 	/**
@@ -228,25 +261,19 @@ public class MainActivity extends FragmentActivity {
 		boolean fieldsValid = validateFields();
 		if (! fieldsValid)
 			return;
-		
-		String[] str = {((EditText) findViewById(R.id.name_field)).getText().toString().trim(),
-			((EditText) findViewById(R.id.phone_field)).getText().toString().trim(),
-			((EditText) findViewById(R.id.extension_field)).getText().toString().trim(),
-			((EditText) findViewById(R.id.email_field)).getText().toString().trim(),
-			((EditText) findViewById(R.id.pole_number_field)).getText().toString().trim(),
-			((EditText) findViewById(R.id.address_field)).getText().toString().trim(),
-			((Spinner) findViewById(R.id.spinner_problem_type)).getSelectedItem().toString(),
-			((EditText) findViewById(R.id.problem_description_field)).getText().toString().trim(),
-			getString(R.string.submit_button)};
-		
-	    FragmentManager fm = getSupportFragmentManager();
-	    AsyncTaskFragment asyncTaskFragment = (AsyncTaskFragment) fm.findFragmentByTag("asyncTask");
 
-	    if (asyncTaskFragment == null) {
-	    	asyncTaskFragment = new AsyncTaskFragment();
-	      fm.beginTransaction().add(asyncTaskFragment, "asyncTask").commit();
-	    }
-		asyncTaskFragment.performHttpPostRequest(str);
+		HashMap<String, String> hashMap = new HashMap<String, String>();
+		hashMap.put("LastName", ((EditText) findViewById(R.id.name_field)).getText().toString().trim());
+		hashMap.put("Phone",((EditText) findViewById(R.id.phone_field)).getText().toString().trim());
+		hashMap.put("PhoneExtension", ((EditText) findViewById(R.id.extension_field)).getText().toString().trim());
+		hashMap.put("Email", ((EditText) findViewById(R.id.email_field)).getText().toString().trim());
+		hashMap.put("PoleNumber", ((EditText) findViewById(R.id.pole_number_field)).getText().toString().trim());
+		hashMap.put("StreetNumber", ((EditText) findViewById(R.id.address_field)).getText().toString().trim());
+		hashMap.put("ProblemType", ((Spinner) findViewById(R.id.spinner_problem_type)).getSelectedItem().toString());
+		hashMap.put("ProblemDescription", ((EditText) findViewById(R.id.problem_description_field)).getText().toString().trim());
+		hashMap.put("SubmitForm", getString(R.string.submit_button));
+		
+		SubmitService.performHttpPostRequest(this, hashMap);
 	}
 	
 	protected void displayDialog(String title, String message, boolean isHtml, final boolean displayIntent)
@@ -276,6 +303,11 @@ public class MainActivity extends FragmentActivity {
 		if (str.equals(""))	{
 			message += "<p>Enter your email address.</p>";
 		}
+		else {
+			boolean isValidEmailAddress = Patterns.EMAIL_ADDRESS.matcher(str).matches();
+			if (! isValidEmailAddress)
+				message += "<p>Please correct your email address.</p>";
+		}
 		str = ((EditText) findViewById(R.id.pole_number_field)).getText().toString().trim();
 		if (str.equals(""))	{
 			message += "<p>Either scan or enter the 7-digit lamppost identifier.</p>";
@@ -290,9 +322,35 @@ public class MainActivity extends FragmentActivity {
 		String title = "";
 		boolean isHtml = true;
     	boolean displayIntent = false;
-    	displayDialog(title, "<html><body><p>Before submitting your report, please fix these issues:</p>" + 
+    	displayDialog(title, "<html><body><b>Before submitting your report, please fix these issues:</b>" + 
     	    message + "</body></html>", isHtml, displayIntent);
     	return false;
+	}
+	
+	public class ResponseReceiver extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive (Context context, Intent intent)
+		{
+			String message = intent.getExtras().getString("message");
+			int statusCode = intent.getExtras().getInt("statusCode");
+			boolean receivedExpectedResponse = intent.getExtras().getBoolean("receivedExpectedResponse", true);
+			
+        	String title = "Http Response Code " + statusCode;
+        	if (receivedExpectedResponse)
+	        {
+        		title = "Thank You for the Report";
+	        }
+        	boolean isHtml = true;
+        	boolean displayIntent = false;
+        	displayDialog(title, message, isHtml, displayIntent);
+        	
+        	if (receivedExpectedResponse)
+	        {
+        		boolean clearEmailAddress = false;
+        		clearForm(clearEmailAddress);
+	        }
+		}
 	}
 
 }
