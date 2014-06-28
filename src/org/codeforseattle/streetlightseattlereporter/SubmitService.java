@@ -34,6 +34,9 @@ import com.google.gdata.util.common.base.StringUtil;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+// import android.util.Log;
 
 /**
  * An IntentService subclass for handling asynchronous task requests in a service on a separate handler thread.
@@ -43,6 +46,7 @@ public class SubmitService extends IntentService
 	/**
 	 * Starts the service to perform the Post request with the given parameters. If
 	 * the service is already performing a task this action will be queued.
+	 * @throws InterruptedException 
 	 * 
 	 * @see IntentService
 	 */
@@ -65,6 +69,26 @@ public class SubmitService extends IntentService
 	{
 		if (intent == null)
 			return;
+		
+		// Retries happen at increasingly long, powers-of-2-second intervals, up to an hour.
+		for (int interval = 2; interval <= 12; interval++)
+		{
+			if (isOnline()) {
+				break;
+			}
+			try {
+				int numMilliSec = (int) (1000 * Math.pow(2, interval));
+				String message = "Connection unavailable. Sleeping for "  + numMilliSec/1000 + " sec.";
+				Intent toastIntent = new Intent();
+				toastIntent.setAction(MainActivity.TOAST_STR);
+				toastIntent.putExtra("toast", message);
+				sendBroadcast(toastIntent);
+				Thread.sleep(numMilliSec);
+			}
+			catch (InterruptedException xcpt) {
+				// Log.e("SubmitService.onHandleIntent", xcpt.getMessage());
+			}
+		}
 		
     	/* Request body:
          * LastName=John+Doe&Phone=206-555-5555&PhoneExtension=&Email=johndoe%40yahoo.com&PoleNumber=0000000&StreetNumber=just+a
@@ -240,6 +264,21 @@ public class SubmitService extends IntentService
 		}
 		// Send the new row to the API for insertion.
 		row = service.insert(listFeedUrl, row);
+	}
+	
+	/**
+	 * http://stackoverflow.com/questions/1560788/how-to-check-internet-access-on-android-inetaddress-never-timeouts
+	 * 
+	 * @return
+	 */
+	private boolean isOnline()
+	{
+	    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+	    if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
+	        return true;
+	    }
+	    return false;
 	}
 
 }

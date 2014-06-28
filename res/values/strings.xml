@@ -11,6 +11,7 @@
     <string name="email_message">Email address:</string>
     <string name="scan_barcode_button">Scan Barcode</string>
     <string name="pole_number_message">7-digit number on pole</string>
+    <string name="get_address_button">Get Location</string>
     <string name="address_message">Location / Address of pole:</string>
     <string name="problem_type_message">Problem type:</string>
     <string name="comments_message">Comments:</string>

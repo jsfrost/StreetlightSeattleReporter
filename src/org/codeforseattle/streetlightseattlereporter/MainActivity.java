@@ -7,8 +7,11 @@ package org.codeforseattle.streetlightseattlereporter;
 import java.util.HashMap;
 import java.util.List;
 
+import android.location.Criteria;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.ContactsContract;
 import android.annotation.TargetApi;
 import android.support.v4.app.FragmentActivity;
@@ -35,8 +38,14 @@ import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity 
 {
+	ToastReceiver mToastReceiver = new ToastReceiver();
+	protected final static String TOAST_STR = "org.codeforseattle.streetlightseattlereporter.TOAST_STR";
+	AddressReceiver mAddressReceiver = new AddressReceiver();
+	protected final static String LOCATION_QUERY_STR = "org.codeforseattle.streetlightseattlereporter.LOCATION_QUERY";
 	ResponseReceiver mResponseReceiver = new ResponseReceiver();
 	protected final static String SUBMIT_RESPONSE_STR = "org.codeforseattle.streetlightseattlereporter.SUBMIT_RESPONSE";
+	LocationManager locationManager = null;
+    String provider = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +53,24 @@ public class MainActivity extends FragmentActivity
 		setContentView(R.layout.activity_main);
 		
 		initializeGui();
+		
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE); // GPS, Network, others
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setSpeedRequired(false);
+        criteria.setCostAllowed(true);
+        provider = locationManager.getBestProvider(criteria, true);
 	}
 	
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
+		registerReceiver(mToastReceiver, new IntentFilter(TOAST_STR));
+		registerReceiver(mAddressReceiver, new IntentFilter(LOCATION_QUERY_STR));
 		registerReceiver(mResponseReceiver, new IntentFilter(SUBMIT_RESPONSE_STR));
 	}
 	
@@ -57,6 +78,8 @@ public class MainActivity extends FragmentActivity
 	protected void onPause()
 	{
 		super.onPause();
+		unregisterReceiver(mToastReceiver);
+		unregisterReceiver(mAddressReceiver);
 		unregisterReceiver(mResponseReceiver);
 	}
 
@@ -87,6 +110,13 @@ public class MainActivity extends FragmentActivity
 		Button scanBtn = (Button) findViewById(R.id.scan_barcode_button);
 		if (! cameraPresent) // Do not try bar code scanning without the camera.
 			scanBtn.setEnabled(false);
+		
+		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO)
+		{
+			// The LocationManager.requestSingleUpdate() is available starting in API 9
+		    Button locationBtn = (Button) findViewById(R.id.get_address_button);
+		    locationBtn.setEnabled(false);
+		}
 		
 		setFocus();
 	}
@@ -168,6 +198,21 @@ public class MainActivity extends FragmentActivity
         	boolean displayIntent = true;
         	displayDialog(title, message, isHtml, displayIntent);
         }
+    }
+	
+	/**
+	 * Respond to the button click and attempt to retrieve and display the user's current location.
+	 * 
+	 * @param view
+	 */
+	public void onGetAddressButtonClick(View view)
+    {
+		MyLocationListener myLocationListener = new MyLocationListener(this, locationManager);
+		Looper looper = null; // Update will happen on main thread.
+    	locationManager.requestSingleUpdate(provider, myLocationListener, looper);
+    	
+		EditText poleAddress = (EditText) findViewById(R.id.address_field);
+		poleAddress.setText("Locating . . .");
     }
 	
 	/**
@@ -350,6 +395,29 @@ public class MainActivity extends FragmentActivity
         		boolean clearEmailAddress = false;
         		clearForm(clearEmailAddress);
 	        }
+		}
+	}
+	
+	public class AddressReceiver extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive (Context context, Intent intent)
+		{
+			String address = intent.getExtras().getString("address");
+			
+			EditText poleAddress = (EditText) findViewById(R.id.address_field);
+			poleAddress.setText(address);
+		}
+	}
+	
+	public class ToastReceiver extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive (Context context, Intent intent)
+		{
+			String toastTest = intent.getExtras().getString("toast");
+			
+			Toast.makeText(MainActivity.this, toastTest, Toast.LENGTH_SHORT).show();
 		}
 	}
 
