@@ -1,0 +1,6 @@
+StreetlightSeattleReporter keeps no personal data from its users. The android 
+permissions READ_PHONE_STATE and READ_CONTACTS are only used to automatically
+fill the user's name and phone number into the streetlight problem
+notification form. The user is free to change these fields if they so desire.
+The values in these fields are sent to Seattle City Light when the user
+submits their problem report.
